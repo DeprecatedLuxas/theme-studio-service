@@ -9,7 +9,6 @@ import org.yaml.snakeyaml.Yaml;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -38,5 +37,14 @@ public class Utils {
             e.printStackTrace();
         }
         return languages;
+    }
+
+    public static <K, V extends Comparable<V>> K maxUsingStreamAndLambda(Map<K, V> map) {
+        Optional<Map.Entry<K, V>> maxEntry = map.entrySet()
+                .stream()
+                .max(Map.Entry.comparingByValue()
+                );
+
+        return maxEntry.get().getKey();
     }
 }

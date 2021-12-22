@@ -2,6 +2,7 @@ package com.lucasnorgaard.tstudioservice.controllers;
 
 import com.lucasnorgaard.tstudioservice.models.Repository;
 import com.lucasnorgaard.tstudioservice.service.GitHubService;
+import com.lucasnorgaard.tstudioservice.service.GitLabService;
 import lombok.Getter;
 import org.kohsuke.github.GHRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,16 +21,18 @@ public class RepoController {
     @Getter
     private GitHubService gitHubService;
 
+    @Autowired
+    @Getter
+    private GitLabService gitLabService;
+
     @GetMapping(value = "/github/{id}", produces = "application/json")
     public ResponseEntity<Repository> getGitHubRepo(@PathVariable String id) {
         return ResponseEntity.ok(getGitHubService().getRepoWithId(id));
     }
 
-//    @GetMapping(value = "/gitlab/{id}", produces = "application/json")
-//    public ResponseEntity<Repository> getGitLabRepo(@PathVariable String id) {
-//        GHRepository repo = getGitHubService().getRepoWithId(id);
-//
-//        return ResponseEntity.ok(new Repository(repo.getName(), repo.getOwnerName(), repo.getLanguage(), getGitHubService().getContent(repo)));
-//    }
+    @GetMapping(value = "/gitlab/{id}", produces = "application/json")
+    public ResponseEntity<Repository> getGitLabRepo(@PathVariable String id) {
+        return ResponseEntity.ok(getGitLabService().getRepoWithId(id));
+    }
 
 }
