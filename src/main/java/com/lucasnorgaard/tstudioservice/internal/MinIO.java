@@ -3,7 +3,7 @@ package com.lucasnorgaard.tstudioservice.internal;
 import io.minio.BucketExistsArgs;
 import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
-import io.minio.errors.MinioException;
+import io.minio.errors.*;
 import lombok.Getter;
 
 import java.io.IOException;
@@ -18,36 +18,31 @@ public class MinIO {
 
 
     public MinIO() {
-        try {
+
             String accessKey = System.getenv("MINIO_ACCESS");
             String secretKey = System.getenv("MINIO_SECRET");
-
+            String minioEndpoint = System.getenv("MINIO_ENDPOINT");
             minioClient = MinioClient
                     .builder()
-                    .endpoint("http://104.248.169.204:9000")
+                    .endpoint(minioEndpoint)
                     .credentials(
                             accessKey,
                             secretKey
                     ).build();
 
-            boolean bucketIconPacksExist = minioClient.bucketExists(BucketExistsArgs.builder().bucket("tstudio-iconpacks").build());
-            boolean bucketRepositoriesExist = minioClient.bucketExists(BucketExistsArgs.builder().bucket("tstudio-repositories").build());
 
+            checkBucketExist("tstudio-iconpacks");
+            checkBucketExist("tstudio-repositories");
+    }
 
-            if (!bucketIconPacksExist) {
-
-                minioClient.makeBucket(MakeBucketArgs.builder().bucket("tstudio-iconpacks").build());
+    public void checkBucketExist(String bucketName) {
+        try {
+            boolean bucketExist = minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build());
+            if (!bucketExist) {
+                  minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build());
             } else {
-                System.out.println("Found a bucket called tstudio-iconpacks");
+                System.out.println("Found a bucket called " + bucketName);
             }
-
-            if (!bucketRepositoriesExist) {
-
-                minioClient.makeBucket(MakeBucketArgs.builder().bucket("tstudio-repositories").build());
-            } else {
-                System.out.println("Found a bucket called tstudio-repositories");
-            }
-
         } catch (MinioException | IOException | NoSuchAlgorithmException | InvalidKeyException e) {
             e.printStackTrace();
         }

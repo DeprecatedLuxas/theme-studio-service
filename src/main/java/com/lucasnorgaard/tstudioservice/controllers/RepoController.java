@@ -30,9 +30,9 @@ public class RepoController {
         return ResponseEntity.ok(getGitHubService().getRepoWithId(id));
     }
 
-    @GetMapping(value = "/gitlab/{id}", produces = "application/json")
-    public ResponseEntity<Repository> getGitLabRepo(@PathVariable String id) {
-        return ResponseEntity.ok(getGitLabService().getRepoWithId(id));
-    }
+    // @GetMapping(value = "/gitlab/{id}", produces = "application/json")
+    // public ResponseEntity<Repository> getGitLabRepo(@PathVariable String id) {
+    //     return ResponseEntity.ok(getGitLabService().getRepoWithId(id));
+    // }
 
 }

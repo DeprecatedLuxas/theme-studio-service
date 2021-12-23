@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 @Service
 public class GitHubService {
 
-    private final Integer MAX_AMOUNT = 100;
     private final String ICON_PATH = "http://104.248.169.204:8080/icon/{icon}";
 
 
@@ -29,6 +28,8 @@ public class GitHubService {
     @Getter
     private LanguageService languageService;
 
+
+    // TODO: Add minio to also work with this.
     public Repository getRepoWithId(String id) {
         GHRepository repo;
         try {
@@ -58,6 +59,7 @@ public class GitHubService {
             for (GHContent content : rootContent) {
 
                 List<Content> contentChildren = new ArrayList<>();
+                Integer MAX_AMOUNT = 100;
                 if (content.isDirectory() && dirs.contains(content.getName())) {
                     contentObj = new Content(
                             content.getName(),
