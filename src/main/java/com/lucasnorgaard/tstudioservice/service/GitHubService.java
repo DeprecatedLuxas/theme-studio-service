@@ -7,6 +7,9 @@ import com.lucasnorgaard.tstudioservice.enums.FileType;
 import com.lucasnorgaard.tstudioservice.exceptions.RepositoryNotFoundException;
 import com.lucasnorgaard.tstudioservice.models.Content;
 import com.lucasnorgaard.tstudioservice.models.Repository;
+import io.minio.GetObjectArgs;
+import io.minio.MinioClient;
+import io.minio.errors.MinioException;
 import lombok.Getter;
 import org.kohsuke.github.GHContent;
 import org.kohsuke.github.GHRepository;
@@ -14,6 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -32,15 +38,15 @@ public class GitHubService {
     // TODO: Add minio to also work with this.
     public Repository getRepoWithId(String id) {
         GHRepository repo;
+        Repository repository;
         try {
             repo = Application.getGitHub().getRepositoryById(Long.parseLong(id));
+
+            repository = new Repository(repo.getName(), repo.getOwnerName(), repo.getLanguage(), this.getContent(repo));
         } catch (IOException e) {
             throw new RepositoryNotFoundException(id);
         }
-        if (repo == null) {
-            throw new RepositoryNotFoundException(id);
-        }
-        return new Repository(repo.getName(), repo.getOwnerName(), repo.getLanguage(), this.getContent(repo));
+        return repository;
     }
 
     // TODO: Improve this please, this is cursed.

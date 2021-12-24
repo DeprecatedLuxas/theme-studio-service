@@ -29,7 +29,7 @@ public class IconController {
             if (icon.contains(".")) {
                 icon = icon.split("\\.")[0];
             }
-            GetObjectArgs args = GetObjectArgs.builder().bucket("tstudio-iconpacks").object("material/" + icon + ".svg").build();
+            GetObjectArgs args = GetObjectArgs.builder().bucket("tstudio-iconpacks").object(icon + ".svg").build();
             InputStream stream = minioClient.getObject(args);
             icon = new String(stream.readAllBytes(), StandardCharsets.UTF_8);
             stream.close();

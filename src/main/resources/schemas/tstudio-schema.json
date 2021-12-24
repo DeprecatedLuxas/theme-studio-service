@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "description": "VSCode Theme Studio JSON Schema",
+  "description": "Theme Studio JSON Schema",
   "type": "object",
   "properties": {
     "exclude": {
