@@ -9,13 +9,11 @@ import org.kohsuke.github.GHContent;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class IconPackTask  implements Runnable {
+public class IconPackTask implements Runnable {
 
     public void run() {
         try {

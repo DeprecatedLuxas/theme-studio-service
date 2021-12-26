@@ -25,4 +25,5 @@ public class Content {
     public String darkIconPath;
     // If type is a file, its null.
     public @Nullable String openDarkIconPath;
+
 }

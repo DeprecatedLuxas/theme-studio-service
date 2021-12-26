@@ -18,7 +18,7 @@ public class MinIO {
 
 
     public MinIO() {
-
+        //
             String accessKey = System.getenv("MINIO_ACCESS");
             String secretKey = System.getenv("MINIO_SECRET");
             String minioEndpoint = System.getenv("MINIO_ENDPOINT");

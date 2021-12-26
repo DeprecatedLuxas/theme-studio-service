@@ -9,9 +9,7 @@ import org.yaml.snakeyaml.Yaml;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class Utils {
 
@@ -28,7 +26,8 @@ public class Utils {
             GHContent content = repo.getFileContent("lib/linguist/languages.yml");
             Yaml yaml = new Yaml();
             Gson gson = new Gson();
-            Type langMapType = new TypeToken<Map<String, Language>>() {}.getType();
+            Type langMapType = new TypeToken<Map<String, Language>>() {
+            }.getType();
             Object json = yaml.loadAs(content.read(), Object.class);
 
             languages = gson.fromJson(gson.toJson(json), langMapType);
@@ -47,4 +46,49 @@ public class Utils {
 
         return maxEntry.get().getKey();
     }
+
+    public static String getCorrectIcon(String ext, String name, boolean dir) {
+        String icon = "";
+        Map<String, List<String>> extMap = Application.getFileIconExtMap();
+        Map<String, List<String>> nameMap = Application.getFileIconNameMap();
+        Map<String, List<String>> folderNameMap = Application.getFolderIconMap();
+
+
+
+        for (Map.Entry<String, List<String>> entry : extMap.entrySet()) {
+            List<String> exts = entry.getValue();
+            if (exts == null) return icon;
+            if (exts.contains(ext)) {
+                icon = entry.getKey();
+                break;
+            }
+        }
+
+        for (Map.Entry<String, List<String>> entry : nameMap.entrySet()) {
+            List<String> names = entry.getValue();
+            if (names == null) return icon;
+            if (names.contains(name)) {
+                icon = entry.getKey();
+                break;
+            }
+        }
+
+        if (dir) {
+            for (Map.Entry<String, List<String>> entry : folderNameMap.entrySet()) {
+                List<String> names = entry.getValue();
+                if (names == null) return icon;
+                if (names.contains(name)) {
+                    icon = entry.getKey();
+                    break;
+                }
+            }
+        }
+
+        if (icon.equals("")) {
+            icon = dir ? "folder" : "file";
+        }
+        return icon;
+    }
+
+
 }
