@@ -43,10 +43,6 @@ public class Application {
     public static Map<String, Language> languages;
 
     @Getter
-    @Setter
-    public static Map<String, JsonObject> schemas = new HashMap<>();
-
-    @Getter
     public static Map<String, List<String>> fileIconExtMap = new HashMap<>();
 
     @Getter
@@ -75,15 +71,6 @@ public class Application {
             Application.getFileMaps();
             Application.getFolderMaps();
 
-            Gson gson = new Gson();
-            Arrays.stream(getResourceFolderFiles("schemas")).forEach(f -> {
-                try {
-                    JsonObject obj = gson.fromJson(Files.readString(Paths.get(f.getPath())), JsonObject.class);
-                    schemas.put(f.getName().split("\\.")[0], obj);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
             gitHub = new GitHubBuilder().withOAuthToken(gitHubToken).build();
             gitLabApi = new GitLabApi("https://gitlab.com", gitLabToken);
             minIO = new MinIO();
@@ -159,13 +146,6 @@ public class Application {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    private static File[] getResourceFolderFiles(String folder) {
-        ClassLoader loader = Application.class.getClassLoader();
-        URL url = loader.getResource(folder);
-        String path = url.getPath();
-        return new File(path).listFiles();
     }
 
 
