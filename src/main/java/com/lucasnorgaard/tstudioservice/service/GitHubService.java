@@ -32,8 +32,8 @@ import java.util.stream.Collectors;
 @Service
 public class GitHubService {
 
-    private final String LIGHT_ICON_PATH = "http://104.248.169.204:8080/icon/{icon}_light";
-    private final String DARK_ICON_PATH = "http://104.248.169.204:8080/icon/{icon}";
+    private final String LIGHT_ICON_PATH = "http://104.248.169.204:8080/icons/{icon}_light";
+    private final String DARK_ICON_PATH = "http://104.248.169.204:8080/icons/{icon}";
 
 
     @Autowired

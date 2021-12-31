@@ -3,6 +3,7 @@ package com.lucasnorgaard.tstudioservice;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 import com.lucasnorgaard.tstudioservice.internal.LanguageTask;
 import com.lucasnorgaard.tstudioservice.internal.MinIO;
 import com.lucasnorgaard.tstudioservice.models.Language;
@@ -18,13 +19,11 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @SpringBootApplication
 public class Application {
@@ -51,6 +50,7 @@ public class Application {
     @Getter
     public static OkHttpClient httpClient = new OkHttpClient();
 
+    public static List<String> validIcons;
 
 
     public static void main(String[] args) {
@@ -71,7 +71,19 @@ public class Application {
                 if (code != 200) VERSION = "4.11.0";
                 JsonObject jsonObject = gson.fromJson(versionResponse.body().string(), JsonObject.class);
                 VERSION = jsonObject.get("version").getAsString();
-                System.out.println("Material Icon Theme v" + VERSION);
+                System.out.println("Found Material Icon Theme v" + VERSION);
+            }
+
+            Request iconsRequest = new Request.Builder().url("https://pkief.vscode-unpkg.net/PKief/material-icon-theme/" + VERSION + "/extension/icons/").build();
+
+            try (Response iconsResponse = httpClient.newCall(iconsRequest).execute()) {
+
+                String responseBody = Objects.requireNonNull(iconsResponse.body()).string();
+
+                TypeToken<List<String>> listTypeToken = new TypeToken<>() {};
+                List<String> icons = gson.fromJson(responseBody, listTypeToken.getType());
+                validIcons = icons.stream().map(icon -> icon.substring(icon.indexOf("icons/") + 6)).collect(Collectors.toList());
+                System.out.println("Found " + validIcons.size() + " icons from Material Icon Theme v" + VERSION);
             }
 
 
