@@ -81,8 +81,7 @@ public class Application {
                 String responseBody = Objects.requireNonNull(iconsResponse.body()).string();
 
                 TypeToken<List<String>> listTypeToken = new TypeToken<>() {};
-                List<String> icons = gson.fromJson(responseBody, listTypeToken.getType());
-                validIcons = icons.stream().map(icon -> icon.substring(icon.indexOf("icons/") + 6)).collect(Collectors.toList());
+                validIcons = gson.fromJson(responseBody, listTypeToken.getType());
                 System.out.println("Found " + validIcons.size() + " icons from Material Icon Theme v" + VERSION);
             }
 
@@ -122,12 +121,13 @@ public class Application {
                     String name = object.get("name").getAsString();
                     List<String> fileNames = gson.fromJson(object.getAsJsonArray("fileNames"), List.class);
                     List<String> fileExtensions = gson.fromJson(object.getAsJsonArray("fileExtensions"), List.class);
-
+                    if (name.contains("type")) System.out.println(name);
                     if (fileNames != null) {
                         fileIconNameMap.put(name, fileNames);
                     }
 
                     if (fileExtensions != null) {
+
                         fileIconExtMap.put(name, fileExtensions);
                     }
                 });
@@ -153,7 +153,7 @@ public class Application {
                     JsonObject object = gson.fromJson(o, JsonObject.class);
                     String name = object.get("name").getAsString();
                     List<String> folderNames = gson.fromJson(object.getAsJsonArray("folderNames"), List.class);
-
+                    if (object.has("enabledFor")) return;
                     if (folderNames != null) {
                         folderIconMap.put(name, folderNames);
                     }

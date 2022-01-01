@@ -3,6 +3,7 @@ package com.lucasnorgaard.tstudioservice;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.lucasnorgaard.tstudioservice.models.Language;
+import com.lucasnorgaard.tstudioservice.models.ResponseIcon;
 import org.kohsuke.github.GHContent;
 import org.kohsuke.github.GHRepository;
 import org.yaml.snakeyaml.Yaml;
@@ -47,12 +48,74 @@ public class Utils {
         return maxEntry.get().getKey();
     }
 
+    public static ResponseIcon getCorrectFolderIcon(String name) {
+        ResponseIcon icon = new ResponseIcon(
+                "folder",
+                "folder-open"
+        );
+
+        for (Map.Entry<String, List<String>> entry : Application.getFolderIconMap().entrySet()) {
+            List<String> names = entry.getValue();
+            String key = entry.getKey();
+            if (names.contains(name)) {
+                icon.url = key;
+                icon.url_opened = key + "-open";
+                break;
+            }
+        }
+        return icon;
+    }
+
+    public static ResponseIcon getCorrectFileIcon(String name, String ext) {
+        ResponseIcon icon = new ResponseIcon(
+                "file",
+                null
+        );
+
+        System.out.println(ext);
+        System.out.println(name);
+
+        if (!ext.equals("")) {
+            System.out.println("Running");
+            for (Map.Entry<String, List<String>> entry : Application.getFileIconExtMap().entrySet()) {
+                List<String> exts = entry.getValue();
+                String key = entry.getKey();
+                System.out.println(exts);
+                if (exts == null) return icon;
+
+                if (exts.contains(ext)) {
+                    icon.url = key;
+                    icon.url_opened = null;
+                    break;
+                }
+            }
+        }
+        System.out.println(icon);
+
+        if (!name.equals("")) {
+            System.out.println("Running 2");
+
+            for (Map.Entry<String, List<String>> entry : Application.getFileIconNameMap().entrySet()) {
+                List<String> names = entry.getValue();
+                String key = entry.getKey();
+                if (names == null) return icon;
+                if (names.contains(name)) {
+                    icon.url = key;
+                    icon.url_opened = null;
+                    break;
+                }
+            }
+        }
+        System.out.println(icon);
+
+        return icon;
+    }
+
     public static String getCorrectIcon(String ext, String name, boolean dir) {
         String icon = "";
         Map<String, List<String>> extMap = Application.getFileIconExtMap();
         Map<String, List<String>> nameMap = Application.getFileIconNameMap();
         Map<String, List<String>> folderNameMap = Application.getFolderIconMap();
-
 
 
         for (Map.Entry<String, List<String>> entry : extMap.entrySet()) {
