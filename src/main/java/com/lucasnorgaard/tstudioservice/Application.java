@@ -14,10 +14,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.gitlab4j.api.GitLabApi;
-import org.kohsuke.github.GHCommit;
-import org.kohsuke.github.GitHub;
-import org.kohsuke.github.GitHubBuilder;
-import org.kohsuke.github.PagedIterator;
+import org.kohsuke.github.*;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -26,6 +23,7 @@ import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @SpringBootApplication
 public class Application {
@@ -62,6 +60,10 @@ public class Application {
 
 
         try {
+            gitHub = new GitHubBuilder().withOAuthToken(gitHubToken).build();
+
+            List<GHContent> directoryContent = gitHub.getRepository("DeprecatedLuxas/icon-mappings").getDirectoryContent("/custom-icons");
+            System.out.println(directoryContent.stream().map(GHContent::getName).filter(name -> name.contains(".svg")).collect(Collectors.toList()));
 
             Request versionRequest = new Request.Builder().url("https://raw.githubusercontent.com/PKief/vscode-material-icon-theme/main/package.json").build();
 
@@ -89,10 +91,12 @@ public class Application {
             }
 
 
+
+
             Application.getFileMaps();
             Application.getFolderMaps();
 
-            gitHub = new GitHubBuilder().withOAuthToken(gitHubToken).build();
+
             gitLabApi = new GitLabApi("https://gitlab.com", gitLabToken);
             minIO = new MinIO();
             languages = Utils.getLanguages();
