@@ -13,8 +13,10 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.gitlab4j.api.GitLabApi;
+import org.kohsuke.github.GHCommit;
 import org.kohsuke.github.GitHub;
 import org.kohsuke.github.GitHubBuilder;
+import org.kohsuke.github.PagedIterator;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -23,15 +25,14 @@ import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 @SpringBootApplication
 public class Application {
 
-    public static String VERSION;
     private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(10);
     private static final String folderUrl = "http://104.248.169.204:3000/iconmapping/folder";
     private static final String fileUrl = "http://104.248.169.204:3000/iconmapping/file";
+    public static String VERSION;
     @Getter
     public static GitHub gitHub;
     @Getter
@@ -51,7 +52,7 @@ public class Application {
     public static OkHttpClient httpClient = new OkHttpClient();
 
     public static List<String> validIcons;
-
+    public static String LAST_COMMIT_SHA = "4518e34d463168d064e62630ebae45f2f2db8fd0";
 
     public static void main(String[] args) {
         Gson gson = new Gson();
@@ -80,7 +81,8 @@ public class Application {
 
                 String responseBody = Objects.requireNonNull(iconsResponse.body()).string();
 
-                TypeToken<List<String>> listTypeToken = new TypeToken<>() {};
+                TypeToken<List<String>> listTypeToken = new TypeToken<>() {
+                };
                 validIcons = gson.fromJson(responseBody, listTypeToken.getType());
                 System.out.println("Found " + validIcons.size() + " icons from Material Icon Theme v" + VERSION);
             }
@@ -100,7 +102,29 @@ public class Application {
 
         SpringApplication.run(Application.class, args);
 
-
+        scheduler.scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    PagedIterator<GHCommit> commits = Application.getGitHub().getRepository("PKief/vscode-material-icon-theme").listCommits()._iterator(0);
+                    if (commits.hasNext()) {
+                        String sha = commits.next().getSHA1();
+                        if (!LAST_COMMIT_SHA.equals(sha)) {
+                            LAST_COMMIT_SHA = sha;
+                            System.out.println("Change detected. Updating SHA to " + sha);
+                            Request mapRequest = new Request.Builder().url("http://104.248.169.204:3000/iconmapping/all").build();
+                            try (Response response = httpClient.newCall(mapRequest).execute()) {
+                                int code = response.code();
+                                if (code != 200) return;
+                                Utils.parseMappings(Objects.requireNonNull(response.body()).string());
+                            }
+                        }
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, 0, 1, TimeUnit.HOURS);
         scheduler.scheduleAtFixedRate(new LanguageTask(), 2, 12, TimeUnit.HOURS);
 
     }
