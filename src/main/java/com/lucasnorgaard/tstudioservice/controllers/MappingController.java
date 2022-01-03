@@ -87,7 +87,7 @@ public class MappingController {
             e.printStackTrace();
         }
         if (mappingStr == null) {
-            System.out.println("Mapping " + mapping + ".json was null");
+            System.out.println("Mapping " + mapping + " was null");
             return ResponseEntity.status(500).header("Content-Type", "application/json")
                     .body("{\"error\": \"Internal Server Error\"}");
         }

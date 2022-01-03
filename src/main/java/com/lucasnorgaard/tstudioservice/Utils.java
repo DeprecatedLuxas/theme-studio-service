@@ -159,53 +159,5 @@ public class Utils {
     }
 
 
-    public static void parseMappings(String mappings) throws IOException {
-        Gson gson = new Gson();
-
-        JsonObject jsonObject = gson.fromJson(mappings, JsonObject.class);
-        GitHub github = Application.getGitHub();
-        GHRepository repository = github.getRepository("DeprecatedLuxas/icon-mappings");
-        if (jsonObject.has("files")) {
-            parseMapping("files", jsonObject.get("files"));
-            System.out.println(gson.toJson(parseMapping("files", jsonObject.get("files"))));;
-        }
-
-        if (jsonObject.has("folder")) {
-            parseMapping("folder", jsonObject.get("folder"));
-        }
-    }
-
-    private static Map<String, Mapping> parseMapping(String type, JsonElement mapping) {
-        Gson gson = new Gson();
-        Map<String, Mapping> mappings = new LinkedHashMap<>();
-        JsonObject jsonObject = gson.fromJson(mapping, JsonObject.class);
-        if (jsonObject.has("icons")) {
-            String nameKey = type.equals("folder") ? "folderNames" : "fileNames";
-            String extensionsKey = type.equals("folder") ? "folderExtensions" : "fileExtensions";
-            JsonArray icons = jsonObject.getAsJsonArray("icons");
-            icons.forEach(i -> {
-                JsonObject object = gson.fromJson(i, JsonObject.class);
-                String name = object.get("name").getAsString();
-                List<String> names = null;
-                List<String> extensions = null;
-                Type listType = new TypeToken<List<String>>() {
-                }.getType();
-                if (object.has(nameKey)) {
-                    names = gson.fromJson(object.getAsJsonArray(nameKey), listType);
-                }
-
-                if (object.has(extensionsKey)) {
-                    extensions = gson.fromJson(object.getAsJsonArray(extensionsKey), listType);
-                }
-                Mapping mappingObj = new Mapping(
-                        names,
-                        extensions
-                );
-                mappings.put(name, mappingObj);
-            });
-
-        }
-        return mappings;
-    }
 
 }

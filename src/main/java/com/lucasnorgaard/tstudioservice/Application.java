@@ -5,6 +5,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.lucasnorgaard.tstudioservice.internal.LanguageTask;
+import com.lucasnorgaard.tstudioservice.internal.MappingsHelper;
 import com.lucasnorgaard.tstudioservice.internal.MinIO;
 import com.lucasnorgaard.tstudioservice.models.Language;
 import lombok.Getter;
@@ -116,7 +117,7 @@ public class Application {
                             try (Response response = httpClient.newCall(mapRequest).execute()) {
                                 int code = response.code();
                                 if (code != 200) return;
-                                Utils.parseMappings(Objects.requireNonNull(response.body()).string());
+                                MappingsHelper.parseMappings(Objects.requireNonNull(response.body()).string());
                             }
                         }
                     }
