@@ -6,8 +6,10 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.lucasnorgaard.tstudioservice.Application;
+import com.lucasnorgaard.tstudioservice.models.Preset;
 import com.lucasnorgaard.tstudioservice.models.marketplace.Marketplace;
 import com.lucasnorgaard.tstudioservice.models.marketplace.Property;
+import com.lucasnorgaard.tstudioservice.models.marketplace.Publisher;
 import com.lucasnorgaard.tstudioservice.models.marketplace.Version;
 import okhttp3.MediaType;
 import okhttp3.Request;
@@ -34,7 +36,7 @@ public class ThemeTask implements Runnable {
             GHRepository repository = Application.getGitHub().getRepository("DeprecatedLuxas/tstudio-presets");
             GHContent file = repository.getFileContent("preset-list.json");
             String fileContent = new String(file.read().readAllBytes(), StandardCharsets.UTF_8);
-            Map<String, String> presets = new HashMap<>();
+            Map<String, Preset> presets = new HashMap<>();
             String query = "{\"assetTypes\":[\"Microsoft.VisualStudio.Services.Icons.Default\",\"Microsoft.VisualStudio.Services.Icons.Branding\",\"Microsoft.VisualStudio.Services.Icons.Small\"],\"filters\":[{\"criteria\":[{\"filterType\":8,\"value\":\"Microsoft.VisualStudio.Code\"},{\"filterType\":10,\"value\":\"target:\\\"Microsoft.VisualStudio.Code\\\" \"},{\"filterType\":12,\"value\":\"37888\"},{\"filterType\":5,\"value\":\"Themes\"}],\"direction\":2,\"pageSize\":100,\"pageNumber\":1,\"sortBy\":4,\"sortOrder\":0,\"pagingToken\":null}],\"flags\":870}";
             RequestBody requestBody = RequestBody.create(query, MediaType.get("application/json"));
             Request request = new Request.Builder().url("https://marketplace.visualstudio.com/_apis/public/gallery/extensionquery").post(requestBody).build();
@@ -85,16 +87,24 @@ public class ThemeTask implements Runnable {
                 }).limit(24).collect(Collectors.toList());
                 marketplaceList.forEach(m -> {
                     Version version = m.versions.get(0);
-
+                    Publisher publisher = m.publisher;
+                    String publisherName = publisher.publisherName;
                     List<Property> properties = version.properties;
                     Property property = properties.stream()
                             .filter(p -> p.key.equals("Microsoft.VisualStudio.Services.Links.GitHub"))
                             .collect(Collectors.toList())
                             .get(0);
-
-                    presets.put(m.extensionName, property.value);
+                    String downloadUrl = "https://marketplace.visualstudio.com/_apis/public/gallery/publishers/"
+                            + publisherName
+                            + "/vsextensions/"
+                            + m.extensionName
+                            + "/"
+                            + version.version
+                            + "/vspackage";
+                    Preset preset = new Preset(property.value, downloadUrl);
+                    presets.put(m.extensionName, preset);
                 });
-                Map<String, String> oldContent = gson.fromJson(fileContent, new TypeToken<Map<String, String>>() {
+                Map<String, Preset> oldContent = gson.fromJson(fileContent, new TypeToken<Map<String, Preset>>() {
                 }.getType());
                 if (presets.equals(oldContent)) {
                     System.out.println("preset-list.json is the same as parsed presets");
@@ -120,7 +130,6 @@ public class ThemeTask implements Runnable {
                         .commit();
 
                 repository.createPullRequest("added presets", refName, "main", "## Added new presets");
-                // Extension Vsix Format: owner.extensionName-version.vsix
             }
         } catch (IOException e) {
             e.printStackTrace();
