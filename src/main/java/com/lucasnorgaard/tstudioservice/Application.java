@@ -55,7 +55,6 @@ public class Application {
     public static String LAST_COMMIT_SHA = "4518e34d463168d064e62630ebae45f2f2db8fd0";
 
     public static void main(String[] args) {
-        scheduler.schedule(new ThemeTask(), 0, TimeUnit.HOURS);
         Gson gson = new Gson();
         String gitHubToken = System.getenv("TSTUDIO_SERVICE_GITHUB");
         String gitLabToken = System.getenv("TSTUDIO_SERVICE_GITLAB");
@@ -63,6 +62,7 @@ public class Application {
 
         try {
             gitHub = new GitHubBuilder().withOAuthToken(gitHubToken).build();
+
 
             List<GHContent> directoryContent = gitHub.getRepository("DeprecatedLuxas/icon-mappings").getDirectoryContent("/custom-icons");
             System.out.println(directoryContent.stream().map(GHContent::getName).filter(name -> name.contains(".svg")).collect(Collectors.toList()));
@@ -108,7 +108,7 @@ public class Application {
         }
 
         SpringApplication.run(Application.class, args);
-
+        scheduler.scheduleAtFixedRate(new ThemeTask(), 0, 1, TimeUnit.DAYS);
         scheduler.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {

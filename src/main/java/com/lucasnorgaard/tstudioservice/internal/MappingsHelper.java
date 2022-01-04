@@ -36,10 +36,9 @@ public class MappingsHelper {
             Map<String, Mapping> ghFileMappings = gson.fromJson(fileMapping, mappingType);
             Map<String, Mapping> fileMappings = parseMapping("files", jsonObject.get("files"));
 
-            System.out.println(gson.toJson(ghFileMappings, mappingType));
-            System.out.println(gson.toJson(fileMappings, mappingType));
-
-            System.out.println(gson.toJson(mergeMappings(ghFileMappings, fileMappings)));
+            // System.out.println(gson.toJson(ghFileMappings, mappingType));
+            // System.out.println(gson.toJson(fileMappings, mappingType));
+            // System.out.println(gson.toJson(mergeMappings(ghFileMappings, fileMappings)));
 
         }
 
