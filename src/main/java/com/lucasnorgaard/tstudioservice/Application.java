@@ -9,6 +9,7 @@ import com.lucasnorgaard.tstudioservice.internal.MappingsHelper;
 import com.lucasnorgaard.tstudioservice.internal.MinIO;
 import com.lucasnorgaard.tstudioservice.internal.ThemeTask;
 import com.lucasnorgaard.tstudioservice.models.Language;
+import com.lucasnorgaard.tstudioservice.models.TStudioPreset;
 import lombok.Getter;
 import lombok.Setter;
 import okhttp3.OkHttpClient;
@@ -29,7 +30,8 @@ import java.util.stream.Collectors;
 @SpringBootApplication
 public class Application {
 
-    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(10);
+    @Getter
+    public static ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(12);
     private static final String folderUrl = "http://104.248.169.204:3000/iconmapping/folder";
     private static final String fileUrl = "http://104.248.169.204:3000/iconmapping/file";
     public static String VERSION;
@@ -51,6 +53,8 @@ public class Application {
     @Getter
     public static OkHttpClient httpClient = new OkHttpClient();
 
+    @Getter
+    public static Map<String, TStudioPreset> presets = new HashMap<>();
     public static List<String> validIcons;
     public static String LAST_COMMIT_SHA = "4518e34d463168d064e62630ebae45f2f2db8fd0";
 

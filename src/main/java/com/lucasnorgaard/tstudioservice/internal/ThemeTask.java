@@ -16,6 +16,8 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import org.kohsuke.github.*;
+import org.springframework.boot.SpringApplication;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -84,7 +86,8 @@ public class ThemeTask implements Runnable {
                     }
                     return EXCLUDED_WORDS.stream().noneMatch(tags::contains);
 
-                }).limit(24).collect(Collectors.toList());
+                }).limit(14).collect(Collectors.toList());
+                // Limiting this to 14, because marketplace api has a max request of 15 per minute.
                 marketplaceList.forEach(m -> {
                     Version version = m.versions.get(0);
                     Publisher publisher = m.publisher;
@@ -102,12 +105,14 @@ public class ThemeTask implements Runnable {
                             + version.version
                             + "/vspackage";
                     Preset preset = new Preset(property.value, downloadUrl);
+
                     presets.put(m.extensionName, preset);
                 });
                 Map<String, Preset> oldContent = gson.fromJson(fileContent, new TypeToken<Map<String, Preset>>() {
                 }.getType());
                 if (presets.equals(oldContent)) {
                     System.out.println("preset-list.json is the same as parsed presets");
+
                     return;
                 }
                 String sha = repository.getRef("heads/main").getObject().getSha();
@@ -120,19 +125,25 @@ public class ThemeTask implements Runnable {
                 String branchName = "new-preset-list-" + branches.size();
 
                 String refName = "refs/heads/" + branchName;
-                repository.createRef(refName, sha);
-                repository.createContent()
-                        .content(gson.toJson(presets))
-                        .message("Added list of presets github url")
-                        .path("preset-list.json")
-                        .sha(blobSha)
-                        .branch(branchName)
-                        .commit();
+                // repository.createRef(refName, sha);
+                // repository.createContent()
+                //        .content(gson.toJson(presets))
+                //         .message("Added list of presets github url")
+                //        .path("preset-list.json")
+                //        .sha(blobSha)
+                //        .branch(branchName)
+                //       .commit();
 
-                repository.createPullRequest("added presets", refName, "main", "## Added new presets");
+                // repository.createPullRequest("added presets", refName, "main", "## Added new presets");
+                for (Preset preset : presets.values()) {
+                    Thread.sleep(2000);
+                    Application.getScheduler().execute(new DownloadPresetVSIX(preset));
+                }
+
             }
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
     }
+
 }
