@@ -16,12 +16,13 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import org.kohsuke.github.*;
-import org.springframework.boot.SpringApplication;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -105,7 +106,24 @@ public class ThemeTask implements Runnable {
                             + version.version
                             + "/vspackage";
                     Preset preset = new Preset(property.value, downloadUrl);
+                    System.out.println("                      ");
+//                    System.out.println(version.version);
+//                    System.out.println(m.extensionName);
+//                    System.out.println(m.displayName);
+//                    System.out.println(m.extensionId);
+//                    System.out.println(publisher.publisherName);
+//                    System.out.println(publisher.publisherId);
+                    System.out.println(version.assetUri);
 
+                    System.out.println(version.fallbackAssetUri);
+                    // https://dracula-theme.gallerycdn.vsassets.io/extensions/dracula-theme/theme-dracula/2.24.1/1639416410130/Microsoft.VisualStudio.Code.Manifest
+                    // https://dracula-theme.gallerycdn.vsassets.io/extensions/dracula-theme/theme-dracula/2.24.1/1639416410000/Microsoft.VisualStudio.Code.Manifest
+                    // https://dracula-theme.gallerycdn.vsassets.io/extensions/dracula-theme/theme-dracula/2.24.1/1639416273023/Microsoft.VisualStudio.Code.Manifest
+                    // https://dracula-theme.gallerycdn.vsassets.io/extensions/dracula-theme/theme-dracula/2.24.1/1639416410/Microsoft.VisualStudio.Code.Manifest
+                    // https://dracula-theme.gallerycdn.vsassets.io/extensions/dracula-theme/theme-dracula/2.24.1/1639416410/Microsoft.VisualStudio.Code.Manifest
+
+                    // https://hookyqr.gallerycdn.vsassets.io/extensions/hookyqr/beautify/1.5.0/1556863124877/Microsoft.VisualStudio.Code.Manifest
+                    // https://%publisher%.gallerycdn.vsassets.io/extensions/%name%/%extension%/%version%/%unix in someway%/Microsoft.VisualStudio.Code.Manifest
                     presets.put(m.extensionName, preset);
                 });
                 Map<String, Preset> oldContent = gson.fromJson(fileContent, new TypeToken<Map<String, Preset>>() {
@@ -135,13 +153,16 @@ public class ThemeTask implements Runnable {
                 //       .commit();
 
                 // repository.createPullRequest("added presets", refName, "main", "## Added new presets");
-                for (Preset preset : presets.values()) {
-                    Thread.sleep(2000);
-                    Application.getScheduler().execute(new DownloadPresetVSIX(preset));
-                }
-
+//                for (Preset preset : presets.values()) {
+//                    Thread.sleep(2000);
+////                    Application.getScheduler().execute(new DownloadPresetVSIX(preset));
+//                }
+                System.out.println(presets.size());
+                // Links to get manifests i think?
+                // https://hookyqr.gallerycdn.vsassets.io/extensions/hookyqr/beautify/1.5.0/1556863124877/Microsoft.VisualStudio.Code.Manifest
+                // https://%publisher%.gallerycdn.vsassets.io/extensions/%name%/%extension%/%version%/%unix in someway%/Microsoft.VisualStudio.Code.Manifest
             }
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
