@@ -7,9 +7,7 @@ import com.google.gson.reflect.TypeToken;
 import com.lucasnorgaard.tstudioservice.internal.LanguageTask;
 import com.lucasnorgaard.tstudioservice.internal.MappingsHelper;
 import com.lucasnorgaard.tstudioservice.internal.MinIO;
-import com.lucasnorgaard.tstudioservice.internal.ThemeTask;
 import com.lucasnorgaard.tstudioservice.models.Language;
-import com.lucasnorgaard.tstudioservice.models.TStudioPreset;
 import lombok.Getter;
 import lombok.Setter;
 import okhttp3.OkHttpClient;
@@ -21,7 +19,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -30,10 +31,12 @@ import java.util.stream.Collectors;
 @SpringBootApplication
 public class Application {
 
-    @Getter
-    public static ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(12);
     private static final String folderUrl = "http://104.248.169.204:3000/iconmapping/folder";
     private static final String fileUrl = "http://104.248.169.204:3000/iconmapping/file";
+    @Getter
+    public static Helpers helpers = new Helpers();
+    @Getter
+    public static ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(12);
     public static String VERSION;
     @Getter
     public static GitHub gitHub;
@@ -54,7 +57,7 @@ public class Application {
     public static OkHttpClient httpClient = new OkHttpClient();
 
     @Getter
-    public static Map<String, TStudioPreset> presets = new HashMap<>();
+    public static Map<String, JsonObject> presets = new HashMap<>();
     public static List<String> validIcons;
     public static String LAST_COMMIT_SHA = "4518e34d463168d064e62630ebae45f2f2db8fd0";
 
@@ -67,7 +70,8 @@ public class Application {
         try {
             gitHub = new GitHubBuilder().withOAuthToken(gitHubToken).build();
 
-
+            presets = Application.getHelpers().getPresets();
+            System.out.println(presets.keySet());
             List<GHContent> directoryContent = gitHub.getRepository("DeprecatedLuxas/icon-mappings").getDirectoryContent("/custom-icons");
             System.out.println(directoryContent.stream().map(GHContent::getName).filter(name -> name.contains(".svg")).collect(Collectors.toList()));
 
@@ -97,8 +101,6 @@ public class Application {
             }
 
 
-
-
             Application.getFileMaps();
             Application.getFolderMaps();
 
@@ -112,7 +114,6 @@ public class Application {
         }
 
         SpringApplication.run(Application.class, args);
-        scheduler.scheduleAtFixedRate(new ThemeTask(), 0, 1, TimeUnit.DAYS);
         scheduler.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
