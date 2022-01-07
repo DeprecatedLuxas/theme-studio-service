@@ -27,7 +27,7 @@ public class Helpers {
             GHRepository repository = gitHub.getRepository("DeprecatedLuxas/tstudio-presets");
             List<GHContent> contents = repository.getDirectoryContent("presets")
                     .stream()
-                    .filter(f -> f.getName().contains(".tstudio-preset")).toList();
+                    .filter(f -> f.getName().contains(".tstudio-preset")).collect(Collectors.toList());
 
 
             for (GHContent content : contents) {

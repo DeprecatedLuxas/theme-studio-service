@@ -2,7 +2,6 @@ package com.lucasnorgaard.tstudioservice.service;
 
 
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.lucasnorgaard.tstudioservice.Application;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +18,6 @@ public class PresetService {
     }
 
     public String getPreset(String key) {
-        return new Gson().toJson(Application.getPresets().get(key));
+        return Application.GSON.toJson(Application.getPresets().get(key));
     }
 }

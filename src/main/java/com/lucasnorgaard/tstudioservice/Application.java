@@ -1,6 +1,7 @@
 package com.lucasnorgaard.tstudioservice;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
@@ -30,10 +31,12 @@ import java.util.stream.Collectors;
 @SpringBootApplication
 public class Application {
 
+    public static Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    public static Helpers HELPERS = new Helpers();
+
     private static final String folderUrl = "http://104.248.169.204:3000/iconmapping/folder";
     private static final String fileUrl = "http://104.248.169.204:3000/iconmapping/file";
-    @Getter
-    public static Helpers helpers = new Helpers();
+
     @Getter
     public static ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(12);
     public static String VERSION;
@@ -61,7 +64,7 @@ public class Application {
     public static String LAST_COMMIT_SHA = "4518e34d463168d064e62630ebae45f2f2db8fd0";
 
     public static void main(String[] args) {
-        Gson gson = new Gson();
+
         String gitHubToken = System.getenv("TSTUDIO_SERVICE_GITHUB");
         String gitLabToken = System.getenv("TSTUDIO_SERVICE_GITLAB");
 
@@ -69,7 +72,7 @@ public class Application {
         try {
             gitHub = new GitHubBuilder().withOAuthToken(gitHubToken).build();
 
-            presets = Application.getHelpers().getPresets();
+            presets = Application.HELPERS.getPresets();
             List<GHContent> directoryContent = gitHub.getRepository("DeprecatedLuxas/icon-mappings").getDirectoryContent("/custom-icons");
             System.out.println(directoryContent.stream().map(GHContent::getName).filter(name -> name.contains(".svg")).collect(Collectors.toList()));
 
@@ -81,7 +84,8 @@ public class Application {
                 // If the package.json is missing, or other stuff happens.
                 // Set version to the latest version. I checked during writing this code.
                 if (code != 200) VERSION = "4.11.0";
-                JsonObject jsonObject = gson.fromJson(versionResponse.body().string(), JsonObject.class);
+                String responseBody = Objects.requireNonNull(versionResponse.body()).string();
+                JsonObject jsonObject = GSON.fromJson(responseBody, JsonObject.class);
                 VERSION = jsonObject.get("version").getAsString();
                 System.out.println("Found Material Icon Theme v" + VERSION);
             }
@@ -94,7 +98,7 @@ public class Application {
 
                 TypeToken<List<String>> listTypeToken = new TypeToken<>() {
                 };
-                validIcons = gson.fromJson(responseBody, listTypeToken.getType());
+                validIcons = GSON.fromJson(responseBody, listTypeToken.getType());
                 System.out.println("Found " + validIcons.size() + " icons from Material Icon Theme v" + VERSION);
             }
 
@@ -105,7 +109,7 @@ public class Application {
 
             gitLabApi = new GitLabApi("https://gitlab.com", gitLabToken);
             minIO = new MinIO();
-            languages = helpers.getLanguages();
+            languages = HELPERS.getLanguages();
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -135,31 +139,26 @@ public class Application {
                 }
             }
         }, 0, 1, TimeUnit.HOURS);
-        scheduler.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                Application.setLanguages(helpers.getLanguages());
-            }
-        }, 2, 12, TimeUnit.HOURS);
+        scheduler.scheduleAtFixedRate(() -> Application.setLanguages(HELPERS.getLanguages()), 2, 12, TimeUnit.HOURS);
 
     }
 
     private static void getFileMaps() {
         try {
-            Gson gson = new Gson();
+
 
             Request fileRequest = new Request.Builder()
                     .url(fileUrl)
                     .build();
 
             try (Response response = httpClient.newCall(fileRequest).execute()) {
-                JsonObject jsonObject = gson.fromJson(Objects.requireNonNull(response.body()).string(), JsonObject.class);
+                JsonObject jsonObject = GSON.fromJson(Objects.requireNonNull(response.body()).string(), JsonObject.class);
                 JsonArray icons = jsonObject.getAsJsonArray("icons");
                 icons.forEach(o -> {
-                    JsonObject object = gson.fromJson(o, JsonObject.class);
+                    JsonObject object = GSON.fromJson(o, JsonObject.class);
                     String name = object.get("name").getAsString();
-                    List<String> fileNames = gson.fromJson(object.getAsJsonArray("fileNames"), List.class);
-                    List<String> fileExtensions = gson.fromJson(object.getAsJsonArray("fileExtensions"), List.class);
+                    List<String> fileNames = GSON.fromJson(object.getAsJsonArray("fileNames"), List.class);
+                    List<String> fileExtensions = GSON.fromJson(object.getAsJsonArray("fileExtensions"), List.class);
                     if (name.contains("type")) System.out.println(name);
                     if (fileNames != null) {
                         fileIconNameMap.put(name, fileNames);
@@ -178,20 +177,19 @@ public class Application {
 
     private static void getFolderMaps() {
         try {
-            Gson gson = new Gson();
 
             Request folderRequest = new Request.Builder()
                     .url(folderUrl)
                     .build();
 
             try (Response response = httpClient.newCall(folderRequest).execute()) {
-                JsonArray jsonArray = gson.fromJson(Objects.requireNonNull(response.body()).string(), JsonArray.class);
+                JsonArray jsonArray = GSON.fromJson(Objects.requireNonNull(response.body()).string(), JsonArray.class);
                 JsonObject jsonObject = (JsonObject) jsonArray.get(0);
                 JsonArray icons = jsonObject.getAsJsonArray("icons");
                 icons.forEach(o -> {
-                    JsonObject object = gson.fromJson(o, JsonObject.class);
+                    JsonObject object = GSON.fromJson(o, JsonObject.class);
                     String name = object.get("name").getAsString();
-                    List<String> folderNames = gson.fromJson(object.getAsJsonArray("folderNames"), List.class);
+                    List<String> folderNames = GSON.fromJson(object.getAsJsonArray("folderNames"), List.class);
                     if (object.has("enabledFor")) return;
                     if (folderNames != null) {
                         folderIconMap.put(name, folderNames);
