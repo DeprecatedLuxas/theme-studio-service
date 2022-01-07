@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
-import com.lucasnorgaard.tstudioservice.internal.LanguageTask;
 import com.lucasnorgaard.tstudioservice.internal.MappingsHelper;
 import com.lucasnorgaard.tstudioservice.internal.MinIO;
 import com.lucasnorgaard.tstudioservice.models.Language;
@@ -71,7 +70,6 @@ public class Application {
             gitHub = new GitHubBuilder().withOAuthToken(gitHubToken).build();
 
             presets = Application.getHelpers().getPresets();
-            System.out.println(presets.keySet());
             List<GHContent> directoryContent = gitHub.getRepository("DeprecatedLuxas/icon-mappings").getDirectoryContent("/custom-icons");
             System.out.println(directoryContent.stream().map(GHContent::getName).filter(name -> name.contains(".svg")).collect(Collectors.toList()));
 
@@ -107,7 +105,7 @@ public class Application {
 
             gitLabApi = new GitLabApi("https://gitlab.com", gitLabToken);
             minIO = new MinIO();
-            languages = Utils.getLanguages();
+            languages = helpers.getLanguages();
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -137,7 +135,12 @@ public class Application {
                 }
             }
         }, 0, 1, TimeUnit.HOURS);
-        scheduler.scheduleAtFixedRate(new LanguageTask(), 2, 12, TimeUnit.HOURS);
+        scheduler.scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+                Application.setLanguages(helpers.getLanguages());
+            }
+        }, 2, 12, TimeUnit.HOURS);
 
     }
 
