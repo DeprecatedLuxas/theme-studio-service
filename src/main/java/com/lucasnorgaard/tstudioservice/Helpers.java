@@ -3,19 +3,25 @@ package com.lucasnorgaard.tstudioservice;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
+import com.lucasnorgaard.tstudioservice.internal.MinIO;
 import com.lucasnorgaard.tstudioservice.models.Language;
 import com.lucasnorgaard.tstudioservice.models.TStudioPreset;
+import io.minio.PutObjectArgs;
+import io.minio.errors.*;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.kohsuke.github.GHContent;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Helpers {
@@ -68,6 +74,38 @@ public class Helpers {
         return languages;
     }
 
+    public void getAndUploadIcons() {
+        List<String> icons = Application.validIcons;
 
+        for (String icon : icons) {
+            Request request = new Request.Builder().url(icon).build();
+            try (Response response = Application.getHttpClient().newCall(request).execute()) {
+                InputStream body = Objects.requireNonNull(response.body()).byteStream();
+                PutObjectArgs args = PutObjectArgs.builder()
+                        .bucket(MinIO.TSTUDIO_ICONS)
+                        .object(Application.VERSION + "/" + MinIO.getName(icon, Application.VERSION))
+                        .stream(body, body.available(), -1)
+                        .contentType("image/svg+xml")
+                        .build();
+                Application.getMinIO().getMinioClient().putObject(args);
 
+            } catch (MinioException | IOException | NoSuchAlgorithmException | InvalidKeyException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void getCustomIcons() throws IOException {
+        List<String> icons = Application.validIcons;
+        List<GHContent> customIcons = Application.getGitHub()
+                .getRepository("DeprecatedLuxas/icon-mappings")
+                .getDirectoryContent("custom-icons")
+                .stream().filter(f -> f.getName().contains(".svg"))
+                .collect(Collectors.toList());
+
+        for (GHContent customIcon : customIcons) {
+            icons.add(customIcon.getDownloadUrl());
+        }
+        System.out.println("Adding " + customIcons.size() + " custom-icons to list");
+    }
 }

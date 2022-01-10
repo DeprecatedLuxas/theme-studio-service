@@ -101,6 +101,7 @@ public class Application {
                 };
                 validIcons = GSON.fromJson(responseBody, listTypeToken.getType());
                 System.out.println("Found " + validIcons.size() + " icons from Material Icon Theme v" + VERSION);
+                HELPERS.getCustomIcons();
             }
 
 
@@ -117,29 +118,27 @@ public class Application {
         }
 
         SpringApplication.run(Application.class, args);
-        scheduler.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    PagedIterator<GHCommit> commits = Application.getGitHub().getRepository("PKief/vscode-material-icon-theme").listCommits()._iterator(0);
-                    if (commits.hasNext()) {
-                        String sha = commits.next().getSHA1();
-                        if (!LAST_COMMIT_SHA.equals(sha)) {
-                            LAST_COMMIT_SHA = sha;
-                            System.out.println("Change detected. Updating SHA to " + sha);
-                            Request mapRequest = new Request.Builder().url("http://104.248.169.204:3000/iconmapping/all").build();
-                            try (Response response = httpClient.newCall(mapRequest).execute()) {
-                                int code = response.code();
-                                if (code != 200) return;
-                                MappingsHelper.parseMappings(Objects.requireNonNull(response.body()).string());
-                            }
+        scheduler.scheduleAtFixedRate(() -> {
+            try {
+                PagedIterator<GHCommit> commits = Application.getGitHub().getRepository("PKief/vscode-material-icon-theme").listCommits()._iterator(0);
+                if (commits.hasNext()) {
+                    String sha = commits.next().getSHA1();
+                    if (!LAST_COMMIT_SHA.equals(sha)) {
+                        LAST_COMMIT_SHA = sha;
+                        System.out.println("Change detected. Updating SHA to " + sha);
+                        Request mapRequest = new Request.Builder().url("http://104.248.169.204:3000/iconmapping/all").build();
+                        try (Response response = httpClient.newCall(mapRequest).execute()) {
+                            int code = response.code();
+                            if (code != 200) return;
+                            MappingsHelper.parseMappings(Objects.requireNonNull(response.body()).string());
                         }
                     }
-                } catch (IOException e) {
-                    e.printStackTrace();
                 }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }, 0, 1, TimeUnit.HOURS);
+        scheduler.scheduleAtFixedRate(() -> HELPERS.getAndUploadIcons(), 0, 24, TimeUnit.HOURS);
         scheduler.scheduleAtFixedRate(() -> Application.setLanguages(HELPERS.getLanguages()), 2, 12, TimeUnit.HOURS);
 
     }
