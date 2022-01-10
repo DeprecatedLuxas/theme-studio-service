@@ -14,6 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 public class Mapping {
 
+    public @Nullable List<String> ids;
     public @Nullable List<String> names;
     public @Nullable List<String> extensions;
 

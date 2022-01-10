@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.lucasnorgaard.tstudioservice.models.Language;
+import com.lucasnorgaard.tstudioservice.models.TStudioPreset;
 import org.kohsuke.github.GHContent;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
@@ -19,10 +20,10 @@ import java.util.stream.Collectors;
 
 public class Helpers {
 
-    public Map<String, JsonObject> getPresets() {
-        Gson gson = new Gson();
+    public Map<String, TStudioPreset> getPresets() {
+
         GitHub gitHub = Application.getGitHub();
-        Map<String, JsonObject> presets = new HashMap<>();
+        Map<String, TStudioPreset> presets = new HashMap<>();
         try {
             GHRepository repository = gitHub.getRepository("DeprecatedLuxas/tstudio-presets");
             List<GHContent> contents = repository.getDirectoryContent("presets")
@@ -33,8 +34,8 @@ public class Helpers {
             for (GHContent content : contents) {
                 try {
                     String fileContent = new String(content.read().readAllBytes(), StandardCharsets.UTF_8);
-                    JsonObject jsonObject = gson.fromJson(fileContent, JsonObject.class);
-                    presets.put(content.getName().replace(".tstudio-preset", ""), jsonObject);
+                    TStudioPreset tStudioPreset = Application.GSON.fromJson(fileContent, TStudioPreset.class);
+                    presets.put(content.getName().replace(".tstudio-preset", ""), tStudioPreset);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -55,16 +56,18 @@ public class Helpers {
             GHRepository repo = Application.getGitHub().getRepository("github/linguist");
             GHContent content = repo.getFileContent("lib/linguist/languages.yml");
             Yaml yaml = new Yaml();
-            Gson gson = new Gson();
             Type langMapType = new TypeToken<Map<String, Language>>() {
             }.getType();
             Object json = yaml.loadAs(content.read(), Object.class);
 
-            languages = gson.fromJson(gson.toJson(json), langMapType);
+            languages = Application.GSON.fromJson(Application.GSON.toJson(json), langMapType);
         } catch (IOException e) {
             e.printStackTrace();
         }
         System.out.println("Updated Languages");
         return languages;
     }
+
+
+
 }

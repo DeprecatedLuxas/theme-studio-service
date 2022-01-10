@@ -4,7 +4,6 @@ package com.lucasnorgaard.tstudioservice.controllers;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.lucasnorgaard.tstudioservice.Application;
-import com.lucasnorgaard.tstudioservice.models.Mapping;
 import org.kohsuke.github.GHContent;
 import org.kohsuke.github.GHFileNotFoundException;
 import org.kohsuke.github.GHRepository;
@@ -20,9 +19,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -69,7 +66,7 @@ public class MappingController {
         try {
 
             if (!INCLUDE.contains(mapping)) {
-                System.out.println("Mapping " + mapping + " was not INCLUDE list.");
+                System.out.println("Mapping " + mapping + " was not in INCLUDE list.");
                 return ResponseEntity.status(404).header("Content-Type", "application/json")
                         .body("{\"error\": \"Mapping was not found\"}");
             }
@@ -94,4 +91,5 @@ public class MappingController {
 
         return ResponseEntity.ok(mappingStr);
     }
+
 }

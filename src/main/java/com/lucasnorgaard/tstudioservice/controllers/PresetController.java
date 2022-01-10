@@ -1,7 +1,7 @@
 package com.lucasnorgaard.tstudioservice.controllers;
 
 
-import com.google.gson.JsonObject;
+import com.lucasnorgaard.tstudioservice.models.TStudioPreset;
 import com.lucasnorgaard.tstudioservice.service.PresetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -25,7 +25,7 @@ public class PresetController {
     }
 
     @GetMapping(value = "/{key}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String getPreset(@PathVariable String key) {
+    public TStudioPreset getPreset(@PathVariable String key) {
         return this.presetService.getPreset(key);
     }
 
