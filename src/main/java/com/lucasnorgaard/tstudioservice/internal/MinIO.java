@@ -9,10 +9,7 @@ import lombok.Getter;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class MinIO {
 
@@ -40,26 +37,15 @@ public class MinIO {
 
     }
 
-    public static String getName(String path, String version) {
-        if (path.contains("https://raw.githubusercontent.com/DeprecatedLuxas/icon-mappings")) {
-            int sub = path.indexOf("https://raw.githubusercontent.com/DeprecatedLuxas/icon-mappings/main/custom-icons/")
-                    + "https://raw.githubusercontent.com/DeprecatedLuxas/icon-mappings/main/custom-icons/".length();
-            return path.substring(sub);
-        }
-        int sub = path.indexOf("https://pkief.vscode-unpkg.net/PKief/material-icon-theme/" + version + "/extension/icons/")
-                + ("https://pkief.vscode-unpkg.net/PKief/material-icon-theme/" + version + "/extension/icons/").length();
-        return path.substring(sub);
-    }
-
     public Set<String> getIconObjects(String version) {
-        Set<String> icons = new HashSet<>();
+        Set<String> icons = new LinkedHashSet<>();
         try {
             ListObjectsArgs listObjectsArgs = ListObjectsArgs.builder().bucket(TSTUDIO_ICONS).recursive(true).build();
             Iterable<Result<Item>> results = minioClient.listObjects(listObjectsArgs);
             for (Result<Item> result : results) {
                 Item item = result.get();
                 String name = item.objectName();
-                if (name.contains(version)) icons.add(name.split("/")[1]);
+                if (name.startsWith(version)) icons.add(name.split("/")[1]);
             }
             return icons;
         } catch (MinioException | IOException | NoSuchAlgorithmException | InvalidKeyException e) {

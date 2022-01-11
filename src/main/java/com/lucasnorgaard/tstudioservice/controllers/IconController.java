@@ -25,6 +25,8 @@ import java.util.Set;
 @RequestMapping("/icons")
 public class IconController {
 
+    private static final String BASE_URL = "https://pkief.vscode-unpkg.net/PKief/material-icon-theme/%VERSION%/extension/icons/%ICON%.svg"
+            .replaceAll("%VERSION%", Application.VERSION);
     @Autowired
     @Getter
     private IconService iconService;
@@ -33,11 +35,6 @@ public class IconController {
     public List<String> getIcons() {
         return iconService.getIcons();
     }
-
-
-    private static final String BASE_URL = "https://pkief.vscode-unpkg.net/PKief/material-icon-theme/%VERSION%/extension/icons/%ICON%.svg"
-            .replaceAll("%VERSION%", Application.VERSION);
-
 
     @GetMapping(value = "/{version}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getIconsByVersion(@PathVariable String version) {
@@ -49,7 +46,10 @@ public class IconController {
     public ResponseEntity<?> getIconByVersionAndName(@PathVariable String version, @PathVariable String iconname) {
         MinIO minIO = Application.getMinIO();
         Set<String> icons = minIO.getIconObjects(version);
-        iconname = iconname + ".svg";
+        if (!iconname.endsWith(".svg")) {
+
+            iconname = iconname + ".svg";
+        }
         boolean found = false;
         String iconXML = null;
         JsonObject jsonObject = new JsonObject();
@@ -105,7 +105,7 @@ public class IconController {
 
     @GetMapping(value = "/file", produces = {"image/svg+xml", "application/json"})
     public ResponseEntity<String> getFileIcon(@RequestParam(value = "name", required = false, defaultValue = "") String name,
-                                                      @RequestParam(value = "ext", required = false, defaultValue = "") String ext) {
+                                              @RequestParam(value = "ext", required = false, defaultValue = "") String ext) {
         System.out.println(name);
         ResponseIcon responseIcon = iconService.getFileIcon(name, ext);
 
@@ -117,7 +117,6 @@ public class IconController {
 
         return iconService.getIcon(responseIcon, false);
     }
-
 
 
 }

@@ -86,7 +86,7 @@ public class Helpers {
                 ByteArrayInputStream inputStream = new ByteArrayInputStream(body.readAllBytes());
                 PutObjectArgs args = PutObjectArgs.builder()
                         .bucket(MinIO.TSTUDIO_ICONS)
-                        .object(Application.VERSION + "/" + MinIO.getName(icon, Application.VERSION))
+                        .object(Application.VERSION + "/" + Application.HELPERS.getFormattedIconName(icon, Application.VERSION))
                         .stream(inputStream, inputStream.available(), -1)
                         .contentType("image/svg+xml")
                         .build();
@@ -96,6 +96,17 @@ public class Helpers {
                 e.printStackTrace();
             }
         }
+    }
+
+    public String getFormattedIconName(String path, String version) {
+        if (path.contains("https://raw.githubusercontent.com/DeprecatedLuxas/icon-mappings")) {
+            int sub = path.indexOf("https://raw.githubusercontent.com/DeprecatedLuxas/icon-mappings/main/custom-icons/")
+                    + "https://raw.githubusercontent.com/DeprecatedLuxas/icon-mappings/main/custom-icons/".length();
+            return path.substring(sub);
+        }
+        int sub = path.indexOf("https://pkief.vscode-unpkg.net/PKief/material-icon-theme/" + version + "/extension/icons/")
+                + ("https://pkief.vscode-unpkg.net/PKief/material-icon-theme/" + version + "/extension/icons/").length();
+        return path.substring(sub);
     }
 
     public void getCustomIcons() throws IOException {

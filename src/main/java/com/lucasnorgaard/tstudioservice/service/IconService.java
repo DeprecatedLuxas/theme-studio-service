@@ -12,12 +12,13 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class IconService {
 
     public List<String> getIcons() {
-        return Application.validIcons;
+        return Application.validIcons.stream().map(u -> Application.HELPERS.getFormattedIconName(u, Application.VERSION).substring(1)).collect(Collectors.toList());
     }
 
 
