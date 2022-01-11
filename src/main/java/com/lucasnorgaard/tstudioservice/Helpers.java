@@ -15,6 +15,8 @@ import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
 import org.yaml.snakeyaml.Yaml;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
@@ -81,10 +83,11 @@ public class Helpers {
             Request request = new Request.Builder().url(icon).build();
             try (Response response = Application.getHttpClient().newCall(request).execute()) {
                 InputStream body = Objects.requireNonNull(response.body()).byteStream();
+                ByteArrayInputStream inputStream = new ByteArrayInputStream(body.readAllBytes());
                 PutObjectArgs args = PutObjectArgs.builder()
                         .bucket(MinIO.TSTUDIO_ICONS)
                         .object(Application.VERSION + "/" + MinIO.getName(icon, Application.VERSION))
-                        .stream(body, body.available(), -1)
+                        .stream(inputStream, inputStream.available(), -1)
                         .contentType("image/svg+xml")
                         .build();
                 Application.getMinIO().getMinioClient().putObject(args);
