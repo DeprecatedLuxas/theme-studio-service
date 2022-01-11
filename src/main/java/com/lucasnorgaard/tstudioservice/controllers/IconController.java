@@ -7,7 +7,10 @@ import com.lucasnorgaard.tstudioservice.models.ResponseIcon;
 import com.lucasnorgaard.tstudioservice.service.IconService;
 import io.minio.GetObjectArgs;
 import io.minio.GetObjectResponse;
+import io.minio.ListObjectsArgs;
+import io.minio.Result;
 import io.minio.errors.MinioException;
+import io.minio.messages.Item;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -18,6 +21,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -80,6 +84,30 @@ public class IconController {
         return ResponseEntity.ok(iconXML);
     }
 
+    @GetMapping(value = "/version", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getVersion() {
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("version", Application.VERSION);
+        return ResponseEntity.status(200).body(Application.GSON.toJson(jsonObject));
+    }
+
+    @GetMapping(value = "/versions", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getVersions() {
+        List<String> versions = new ArrayList<>();
+        try {
+            ListObjectsArgs listObjectsArgs = ListObjectsArgs.builder().bucket(MinIO.TSTUDIO_ICONS).build();
+            Iterable<Result<Item>> results = Application.getMinIO().getMinioClient().listObjects(listObjectsArgs);
+            for (Result<Item> result : results) {
+                Item item = result.get();
+                String name = item.objectName();
+                versions.add(name.substring(0, name.indexOf("/")));
+            }
+        } catch (MinioException | IOException | NoSuchAlgorithmException | InvalidKeyException e) {
+            System.out.println("Error occurred: " + e);
+        }
+        return ResponseEntity.ok(Application.GSON.toJson(versions));
+    }
+
     @GetMapping(value = "/folder/{foldername}", produces = {"image/svg+xml", "application/json"})
     public ResponseEntity<String> getIconByFolderName(@PathVariable String foldername,
                                                       @RequestParam(value = "open", required = false, defaultValue = "false") String open) {
@@ -96,12 +124,6 @@ public class IconController {
         return iconService.getIcon(responseIcon, isOpen);
     }
 
-    @GetMapping(value = "/version", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getVersion() {
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("version", Application.VERSION);
-        return ResponseEntity.status(200).body(Application.GSON.toJson(jsonObject));
-    }
 
     @GetMapping(value = "/file", produces = {"image/svg+xml", "application/json"})
     public ResponseEntity<String> getFileIcon(@RequestParam(value = "name", required = false, defaultValue = "") String name,
