@@ -121,7 +121,7 @@ public class MappingsHelper {
                 builder.branch(branchName).commit();
             }
 
-//            repository.createPullRequest("updated new mappings", refName, "main", getBody(mappingKeys));
+            repository.createPullRequest("updated new mappings", refName, "main", getBody(mappingKeys));
         } catch (IOException e) {
             e.printStackTrace();
         }
