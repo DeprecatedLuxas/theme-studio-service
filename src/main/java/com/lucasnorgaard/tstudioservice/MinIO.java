@@ -1,6 +1,5 @@
-package com.lucasnorgaard.tstudioservice.internal;
+package com.lucasnorgaard.tstudioservice;
 
-import com.lucasnorgaard.tstudioservice.Application;
 import io.minio.*;
 import io.minio.errors.MinioException;
 import io.minio.messages.Item;
@@ -9,10 +8,10 @@ import lombok.Getter;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 public class MinIO {
-
 
     public static String TSTUDIO_REPOSITORIES = "tstudio-repositories";
     public static String TSTUDIO_ICONS = "tstudio-icons";

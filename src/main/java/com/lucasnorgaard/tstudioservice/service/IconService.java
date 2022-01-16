@@ -58,7 +58,7 @@ public class IconService {
 //        return ResponseEntity.ok(icon);
 //    }
 
-    public ResponseEntity<String> getIcon(ResponseIcon responseIcon, boolean open) {
+    public ResponseEntity<?> getIcon(ResponseIcon responseIcon, boolean open) {
         OkHttpClient httpClient = Application.getHttpClient();
         String icon = "";
         try {
@@ -79,7 +79,6 @@ public class IconService {
                             .body("{\"error\": \"The specified icon does not exist\"}");
                 }
                 icon = Objects.requireNonNull(iconResponse.body()).string();
-
             }
 
         } catch (IOException e) {
@@ -87,7 +86,7 @@ public class IconService {
             return ResponseEntity.status(404).header("Content-Type", "application/json")
                     .body("{\"error\": \"The specified icon does not exist\"}");
         }
-        return ResponseEntity.ok(icon);
+        return ResponseEntity.ok().header("Content-Type", "image/svg+xml").body(icon);
     }
 
     public ResponseIcon getFileIcon(String name, String ext) {

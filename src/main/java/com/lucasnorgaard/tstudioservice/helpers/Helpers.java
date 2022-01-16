@@ -1,13 +1,12 @@
-package com.lucasnorgaard.tstudioservice;
+package com.lucasnorgaard.tstudioservice.helpers;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
-import com.lucasnorgaard.tstudioservice.internal.MinIO;
+import com.lucasnorgaard.tstudioservice.Application;
+import com.lucasnorgaard.tstudioservice.MinIO;
 import com.lucasnorgaard.tstudioservice.models.Language;
 import com.lucasnorgaard.tstudioservice.models.TStudioPreset;
 import io.minio.PutObjectArgs;
-import io.minio.errors.*;
+import io.minio.errors.MinioException;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.kohsuke.github.GHContent;
@@ -15,7 +14,6 @@ import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
 import org.yaml.snakeyaml.Yaml;
 
-import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,7 +21,10 @@ import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class Helpers {

@@ -1,4 +1,4 @@
-package com.lucasnorgaard.tstudioservice.internal;
+package com.lucasnorgaard.tstudioservice.helpers;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class MappingsHelper {
-
 
     public static void parseMappings(String mappings) {
         try {
@@ -121,7 +120,7 @@ public class MappingsHelper {
                 builder.branch(branchName).commit();
             }
 
-            repository.createPullRequest("updated new mappings", refName, "main", getBody(mappingKeys));
+            //repository.createPullRequest("updated new mappings", refName, "main", getBody(mappingKeys));
         } catch (IOException e) {
             e.printStackTrace();
         }

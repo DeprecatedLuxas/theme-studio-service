@@ -2,7 +2,7 @@ package com.lucasnorgaard.tstudioservice.controllers;
 
 import com.google.gson.JsonObject;
 import com.lucasnorgaard.tstudioservice.Application;
-import com.lucasnorgaard.tstudioservice.internal.MinIO;
+import com.lucasnorgaard.tstudioservice.MinIO;
 import com.lucasnorgaard.tstudioservice.models.ResponseIcon;
 import com.lucasnorgaard.tstudioservice.service.IconService;
 import io.minio.GetObjectArgs;
@@ -108,12 +108,12 @@ public class IconController {
         return ResponseEntity.ok(Application.GSON.toJson(versions));
     }
 
-    @GetMapping(value = "/folder/{foldername}", produces = {"image/svg+xml", "application/json"})
-    public ResponseEntity<String> getIconByFolderName(@PathVariable String foldername,
+    @GetMapping(value = "/folder", produces = {MediaType.APPLICATION_JSON_VALUE, "image/svg+xml" })
+    public ResponseEntity<?> getIconByFolderName(@RequestParam(value = "name", required = false, defaultValue = "folder") String name,
                                                       @RequestParam(value = "open", required = false, defaultValue = "false") String open) {
         boolean isOpen = open.equals("true");
 
-        ResponseIcon responseIcon = iconService.getIconByFolderName(foldername);
+        ResponseIcon responseIcon = iconService.getIconByFolderName(name);
 
         responseIcon.url = BASE_URL.replaceAll("%ICON%", responseIcon.url);
         if (responseIcon.url_opened != null) {
@@ -126,7 +126,7 @@ public class IconController {
 
 
     @GetMapping(value = "/file", produces = {"image/svg+xml", "application/json"})
-    public ResponseEntity<String> getFileIcon(@RequestParam(value = "name", required = false, defaultValue = "") String name,
+    public ResponseEntity<?> getFileIcon(@RequestParam(value = "name", required = false, defaultValue = "") String name,
                                               @RequestParam(value = "ext", required = false, defaultValue = "") String ext) {
         System.out.println(name);
         ResponseIcon responseIcon = iconService.getFileIcon(name, ext);
@@ -139,6 +139,7 @@ public class IconController {
 
         return iconService.getIcon(responseIcon, false);
     }
+
 
 
 }
